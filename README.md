@@ -13,11 +13,11 @@ Type: Capstone Project with SaaS Expansion Potential
 
 ## Product Name
 
-AI Architectg Solution
+AI Architect Solution
 
 ## Product Vision
 
-AI Architectg Solution is an AI-powered consulting platform that transforms business requirements into implementation-ready automation solution packages.
+AI Architect Solution is an AI-powered consulting platform that transforms business requirements into implementation-ready automation solution packages.
 
 The platform acts as a virtual:
 
@@ -756,4 +756,4 @@ Phase 4
 
 # 20. One-Line Product Summary
 
-AI Architectg Solution is an AI-powered consulting platform that converts business requirements into implementation-ready automation architectures, workflow blueprints, cost estimates, and client-ready solution packages.
+AI Architect Solution is an AI-powered consulting platform that converts business requirements into implementation-ready automation architectures, workflow blueprints, cost estimates, and client-ready solution packages.
