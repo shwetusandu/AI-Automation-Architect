@@ -111,11 +111,6 @@ function Landing() {
               Describe a business process. The platform conducts discovery, classifies the domain,
               proposes strategies, and produces deliverables on demand.
             </p>
-            <Button asChild size="lg" className="mt-8">
-              <Link to="/auth">
-                Start new solution <ArrowRight className="ml-1.5 h-4 w-4" />
-              </Link>
-            </Button>
           </div>
         </section>
       </main>

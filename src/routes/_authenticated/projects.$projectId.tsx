@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, ArrowRight, Check, CircleAlert, CircleX, Loader2, Sparkles, Star, Briefcase, Network, Workflow, Bot, DollarSign, Map as MapIcon, FileText, ChevronDown, Copy, ChevronsUpDown, ChevronsDownUp, AlertTriangle, TrendingUp, Zap, Target, Clock, Gauge, ShieldAlert, Lightbulb, Wrench, Rocket, Brain } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleAlert, CircleX, Loader2, Sparkles, Star, Briefcase, Network, Workflow, Bot, DollarSign, Map as MapIcon, FileText, ChevronDown, Copy, ChevronsUpDown, ChevronsDownUp, AlertTriangle, TrendingUp, Zap, Target, Clock, Gauge, ShieldAlert, Lightbulb, Wrench, Rocket, Brain, Download } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import mermaid from "mermaid";
@@ -40,20 +40,24 @@ function ProjectWorkspace() {
     refetchOnWindowFocus: false,
   });
 
-  if (isLoading || !data) {
+  const project = data?.project;
+  const stage = project?.selected_strategy
+    ? "delivery"
+    : (project?.status === "strategy" || (data?.strategies?.length ?? 0) > 0)
+      ? "strategy"
+      : "discovery";
+  const mindMapUnlocked = (data?.strategies?.length ?? 0) > 0;
+  const [activeTab, setActiveTab] = useState<string>(stage);
+  // Keep tab in sync when the underlying stage advances
+  useEffect(() => { setActiveTab(stage); }, [stage]);
+
+  if (isLoading || !data || !project) {
     return (
       <main className="grid place-items-center py-32 text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin" />
       </main>
     );
   }
-
-  const { project } = data;
-  const stage = project.selected_strategy ? "delivery" : (project.status === "strategy" || (data.strategies?.length ?? 0) > 0) ? "strategy" : "discovery";
-  const mindMapUnlocked = (data.strategies?.length ?? 0) > 0;
-  const [activeTab, setActiveTab] = useState<string>(stage);
-  // Keep tab in sync when the underlying stage advances
-  useEffect(() => { setActiveTab(stage); }, [stage]);
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-6">
@@ -585,13 +589,13 @@ const SECTIONS: Array<{
   accent: string;
   items: string[];
 }> = [
-  { key: "executive", label: "Executive Summary", blurb: "Problem, solution, business value, risks.", Icon: Briefcase, accent: "text-blue-500 bg-blue-500/10 border-blue-500/30", items: ["business_analysis"] },
-  { key: "architecture", label: "Architecture", blurb: "Diagram, data flow, systems, integrations.", Icon: Network, accent: "text-violet-500 bg-violet-500/10 border-violet-500/30", items: ["architecture"] },
-  { key: "make", label: "Workflow Design", blurb: "Detailed execution blueprint outlining workflow modules, decision logic, data handling, approvals, integrations, and exception paths. Designed for implementation across Make.com, n8n, and enterprise automation platforms.", Icon: Workflow, accent: "text-amber-500 bg-amber-500/10 border-amber-500/30", items: ["make_blueprint", "make_workflow"] },
-  { key: "agents", label: "AI Agents", blurb: "Agent cards: purpose, inputs, outputs, prompts.", Icon: Bot, accent: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30", items: ["ai_agents"] },
-  { key: "cost", label: "Cost", blurb: "Volume-based estimates and API economics.", Icon: DollarSign, accent: "text-cyan-500 bg-cyan-500/10 border-cyan-500/30", items: ["cost_estimate", "api_recommendations"] },
-  { key: "roadmap", label: "Roadmap & Readiness", blurb: "Phases, dependencies, readiness, consultant memo.", Icon: MapIcon, accent: "text-rose-500 bg-rose-500/10 border-rose-500/30", items: ["roadmap", "readiness_score", "consultant_recommendations"] },
-  { key: "proposal", label: "Proposal", blurb: "Client-facing scope, timeline, success metrics.", Icon: FileText, accent: "text-slate-300 bg-slate-500/10 border-slate-500/30", items: ["proposal"] },
+  { key: "executive", label: "Executive Summary\nWhat are we building?", blurb: "Problem, solution, business value, risks.", Icon: Briefcase, accent: "text-blue-500 bg-blue-500/10 border-blue-500/30", items: ["business_analysis"] },
+  { key: "architecture", label: "Architecture\nHow does it work?", blurb: "Diagram, data flow, systems, integrations.", Icon: Network, accent: "text-violet-500 bg-violet-500/10 border-violet-500/30", items: ["architecture"] },
+  { key: "make", label: "Workflow Design\nHow do I build it?", blurb: "Detailed execution blueprint outlining workflow modules, decision logic, data handling, approvals, integrations, and exception paths. Designed for implementation across Make.com, n8n, and enterprise automation platforms.", Icon: Workflow, accent: "text-amber-500 bg-amber-500/10 border-amber-500/30", items: ["make_blueprint", "make_workflow"] },
+  { key: "agents", label: "AI Agents\nWhere are AI used?", blurb: "Agent cards: purpose, inputs, outputs, prompts.", Icon: Bot, accent: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30", items: ["ai_agents"] },
+  { key: "cost", label: "Cost\nHow much will it cost?", blurb: "Volume-based estimates and API economics.", Icon: DollarSign, accent: "text-cyan-500 bg-cyan-500/10 border-cyan-500/30", items: ["cost_estimate", "api_recommendations"] },
+  { key: "roadmap", label: "Roadmap & Readiness\nCan we Implement it?", blurb: "Phases, dependencies, readiness, consultant memo.", Icon: MapIcon, accent: "text-rose-500 bg-rose-500/10 border-rose-500/30", items: ["roadmap", "readiness_score", "consultant_recommendations"] },
+  { key: "proposal", label: "Proposal\nReady", blurb: "Client-facing scope, timeline, success metrics.", Icon: FileText, accent: "text-slate-300 bg-slate-500/10 border-slate-500/30", items: ["proposal"] },
 ];
 
 function DeliveryView({ projectId, data }: { projectId: string; data: ProjectData }) {
@@ -619,6 +623,113 @@ function DeliveryView({ projectId, data }: { projectId: string; data: ProjectDat
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
   });
+
+  const autoTriggered = useRef(false);
+  useEffect(() => {
+    if (autoTriggered.current) return;
+    if (generatedKinds.length === 0 && !generateAll.isPending) {
+      autoTriggered.current = true;
+      generateAll.mutate();
+    }
+  }, [generatedKinds.length, generateAll.isPending]);
+
+  async function downloadPdf() {
+    try {
+      const { default: jsPDF } = await import("jspdf");
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 48;
+      const maxWidth = pageWidth - margin * 2;
+      let y = margin;
+
+      const ensureSpace = (h: number) => {
+        if (y + h > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+      };
+      const writeWrapped = (text: string, size = 10, bold = false) => {
+        doc.setFont("helvetica", bold ? "bold" : "normal");
+        doc.setFontSize(size);
+        const lines = doc.splitTextToSize(text, maxWidth);
+        for (const line of lines) {
+          ensureSpace(size + 4);
+          doc.text(line, margin, y);
+          y += size + 4;
+        }
+      };
+      const renderValue = (val: any, depth = 0) => {
+        const indent = "  ".repeat(depth);
+        if (val == null) return;
+        if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
+          writeWrapped(`${indent}${String(val)}`, 10);
+          return;
+        }
+        if (Array.isArray(val)) {
+          val.forEach((item, i) => {
+            if (item && typeof item === "object") {
+              writeWrapped(`${indent}• Item ${i + 1}`, 10, true);
+              renderValue(item, depth + 1);
+            } else {
+              writeWrapped(`${indent}• ${String(item)}`, 10);
+            }
+          });
+          return;
+        }
+        if (typeof val === "object") {
+          for (const [k, v] of Object.entries(val)) {
+            if (v == null || (Array.isArray(v) && v.length === 0)) continue;
+            const label = k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+            if (typeof v === "object") {
+              writeWrapped(`${indent}${label}:`, 11, true);
+              renderValue(v, depth + 1);
+            } else {
+              writeWrapped(`${indent}${label}: ${String(v)}`, 10);
+            }
+          }
+        }
+      };
+
+      // Cover
+      writeWrapped((data.project as any).title || data.project.name || "Project", 22, true);
+      y += 6;
+      if (data.project.initial_request) writeWrapped(data.project.initial_request, 11);
+      y += 10;
+      writeWrapped(`Strategy: ${data.project.selected_strategy ?? "—"}`, 10);
+      writeWrapped(`Generated: ${new Date().toLocaleString()}`, 10);
+
+      for (const section of SECTIONS) {
+        doc.addPage();
+        y = margin;
+        const title = section.label.split("\n")[0];
+        const subtitle = section.label.split("\n")[1] ?? "";
+        writeWrapped(title, 18, true);
+        if (subtitle) writeWrapped(subtitle, 11);
+        if (section.blurb) writeWrapped(section.blurb, 9);
+        y += 8;
+        for (const kind of section.items) {
+          const d = byKind.get(kind);
+          writeWrapped(kind.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()), 13, true);
+          y += 2;
+          if (!d) {
+            writeWrapped("(not generated)", 10);
+          } else {
+            renderValue(d);
+          }
+          y += 8;
+        }
+      }
+
+      const fileName = `${(data.project.name ?? "project").replace(/[^a-z0-9\-_]+/gi, "_")}.pdf`;
+      doc.save(fileName);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to generate PDF");
+    }
+  }
+
+
+
 
 
   const readinessData = byKind.get("readiness_score") as any;
@@ -666,6 +777,11 @@ function DeliveryView({ projectId, data }: { projectId: string; data: ProjectDat
               {generateAll.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1.5 h-3.5 w-3.5" />}
               {allGenerated ? "Regenerate all" : "Generate all"}
             </Button>
+            <Button size="sm" variant="outline" onClick={downloadPdf} disabled={generateAll.isPending || generatedKinds.length === 0}>
+              <Download className="mr-1.5 h-3.5 w-3.5" />
+              Download PDF
+            </Button>
+
           </div>
         </div>
 
@@ -704,11 +820,15 @@ function DeliveryView({ projectId, data }: { projectId: string; data: ProjectDat
                   <s.Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className={`truncate text-sm font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{s.label}</div>
+                  <div className={`whitespace-pre-line text-sm font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{s.label}</div>
                   <div className="mt-0.5 flex items-center gap-1.5">
                     <span className={`inline-block h-1.5 w-1.5 rounded-full ${sectionAllGenerated ? "bg-emerald-500" : someGenerated ? "bg-amber-500" : "bg-muted-foreground/30"}`} />
                     <span className="text-[10px] text-muted-foreground">
-                      {sectionAllGenerated ? "Ready" : someGenerated ? `${generatedCount}/${total}` : "Pending"}
+                      {sectionAllGenerated ? (
+                        s.key === "roadmap" ? "Can we implement it?" :
+                        s.key === "proposal" ? "What's the final recommendation?" :
+                        "Ready"
+                      ) : someGenerated ? `${generatedCount}/${total}` : "Pending"}
                     </span>
                   </div>
                 </div>
@@ -724,7 +844,7 @@ function DeliveryView({ projectId, data }: { projectId: string; data: ProjectDat
               <active.Icon className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <h2 className="font-serif text-xl">{active.label}</h2>
+              <h2 className="font-serif text-xl">{active.label.split("\n")[0]}</h2>
               <p className="text-xs text-muted-foreground">{active.blurb}</p>
             </div>
           </div>
