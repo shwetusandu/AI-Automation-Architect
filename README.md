@@ -7,6 +7,7 @@ Status: MVP Definition Complete
 Owner: Product Team
 Type: Capstone Project with SaaS Expansion Potential
 
+![User Guide](AI_Architect_Solution_User_Guide.docx)
 ---
 
 # 1. Executive Summary
